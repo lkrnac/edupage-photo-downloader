@@ -13,6 +13,8 @@ public class EdupagePhotoDownloaderApplication {
         driver.get("https://" + System.getProperty("edupage.url"));
         new LoginPage(driver).login();
 
+        new PhotosPage(driver).navigateTo();
+
         Thread.sleep(2000000);
         driver.close();
     }
