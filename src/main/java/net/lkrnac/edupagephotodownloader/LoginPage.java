@@ -12,7 +12,7 @@ import java.time.Duration;
 public class LoginPage {
     private final WebDriver driver;
 
-    public void login() {
+    void login() {
         var edupageUsername = System.getProperty("edupage.username");
         var edupagePassword = System.getProperty("edupage.password");
 
