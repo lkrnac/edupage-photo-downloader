@@ -7,15 +7,15 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 
 public class EdupagePhotoDownloaderApplication {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         var driver = getWebDriver();
 
         driver.get("https://" + System.getProperty("edupage.url"));
         new LoginPage(driver).login();
 
-        new PhotosPage(driver).navigateTo();
+        new PhotosPage(driver).navigateTo()
+                        .downloadAllNew();
 
-        Thread.sleep(2000000);
         driver.close();
     }
 
