@@ -2,6 +2,7 @@ package net.lkrnac.edupagephotodownloader;
 
 import lombok.SneakyThrows;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -25,12 +26,14 @@ public class PhotosPage {
 
     private final WebDriver driver;
     private final WebDriverWait wait;
+    private final JavascriptExecutor js;
     private final String photosLocation;
     private final String tmpDownloadDir;
 
     public PhotosPage(WebDriver driver, String photosLocation, String tmpDownloadDir) {
         this.driver = driver;
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        this.js = (JavascriptExecutor) driver;
         this.photosLocation = photosLocation;
         this.tmpDownloadDir = tmpDownloadDir;
     }
@@ -60,7 +63,7 @@ public class PhotosPage {
 
     @SneakyThrows
     private void downloadPhotosGroup(WebElement li) {
-        Thread.sleep(500);
+        js.executeScript("arguments[0].scrollIntoView(true);", li);
         li.click();
         new PhotosPreviewPage(driver)
                 .downloadAllPhotos();
