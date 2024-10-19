@@ -100,14 +100,14 @@ public class PhotosPage {
     private static String findLastSavedDate(File directory) {
         File[] directories = directory.listFiles(File::isDirectory);
 
-        return directories == null || directories.length == 0
-                ? "1980-01-01"
-                : (
-                        Arrays.stream(directories)
-                                .filter(subdirectory -> datePattern.matcher(subdirectory.getName()).find())
-                                .max(Comparator.comparing(File::getName))
-                                .map(subdirectory -> subdirectory.getName().substring(0, 10))
-                                .orElse(null)
-                );
+        if (directories == null || directories.length == 0) {
+            return "1980-01-01";
+        }
+
+        return Arrays.stream(directories)
+                .filter(subdirectory -> datePattern.matcher(subdirectory.getName()).find())
+                .max(Comparator.comparing(File::getName))
+                .map(subdirectory -> subdirectory.getName().substring(0, 10))
+                .orElse("1980-01-01");
     }
 }
