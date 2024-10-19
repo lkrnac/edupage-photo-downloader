@@ -27,13 +27,12 @@ public class PhotosPreviewPage {
 
     @SneakyThrows
     void downloadAllPhotos() {
-        WebElement downloadButton = wait.until(ExpectedConditions.visibilityOfElementLocated((By.cssSelector(".photos-button-viewImage"))));
-
         wait.until(ExpectedConditions.visibilityOfElementLocated((By.cssSelector(PHOTOS_PHOTO_THUMB))));
         List<WebElement> thumbElements = driver.findElements(By.cssSelector(PHOTOS_PHOTO_THUMB));
-        thumbElements.get(0).click();
-        wait.until((ExpectedCondition<Boolean>) webDriver -> thumbElements.get(0).getAttribute("class").contains("selected"));
+        thumbElements.getFirst().click();
+        wait.until((ExpectedCondition<Boolean>) webDriver -> thumbElements.getFirst().getAttribute("class").contains("selected"));
 
+        WebElement downloadButton = wait.until(ExpectedConditions.visibilityOfElementLocated((By.cssSelector(".photos-button-viewImage"))));
         for (int idx = 0; idx < thumbElements.size(); idx++) {
             var thumbElement = thumbElements.get(idx);
             //noinspection DataFlowIssue

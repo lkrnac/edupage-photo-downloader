@@ -67,10 +67,12 @@ public class PhotosPage {
     @SneakyThrows
     private void downloadPhotosGroup(WebElement li) {
         js.executeScript("arguments[0].scrollIntoView(true);", li);
+        wait.until(ExpectedConditions.visibilityOf(li));
         li.click();
         new PhotosPreviewPage(driver)
                 .downloadAllPhotos();
 
+        wait.until(ExpectedConditions.visibilityOf(li));
         String newDirectoryName = li.getAttribute(DATA_DATE) + " " + li.findElement(By.cssSelector(".textContent")).getText();
         String nameWithoutEmojis = newDirectoryName.replaceAll(EMOJI_PATTERN, "").trim();
         String targetDirectoryPath = photosLocation + File.separator + nameWithoutEmojis;
