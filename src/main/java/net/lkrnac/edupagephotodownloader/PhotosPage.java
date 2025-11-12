@@ -10,6 +10,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
@@ -76,7 +77,20 @@ public class PhotosPage {
         String newDirectoryName = li.getAttribute(DATA_DATE) + " " + li.findElement(By.cssSelector(".textContent")).getText();
         String nameWithoutEmojis = newDirectoryName.replaceAll(EMOJI_PATTERN, "").trim();
         String targetDirectoryPath = photosLocation + File.separator + nameWithoutEmojis;
-        Files.move(Paths.get(tmpDownloadDir), Paths.get(targetDirectoryPath), StandardCopyOption.REPLACE_EXISTING);
+        Files.createDirectories(Paths.get(targetDirectoryPath));
+        moveFilesFromTemporaryFolder(targetDirectoryPath);
+    }
+
+    @SneakyThrows
+    private void moveFilesFromTemporaryFolder(String targetDirectoryPath) {
+        try (var files = Files.list(Paths.get(tmpDownloadDir))) {
+            files.forEach(p -> moveFile(targetDirectoryPath, p));
+        }
+    }
+
+    @SneakyThrows
+    private static void moveFile(String targetDirectoryPath, Path p) {
+        Files.move(p, Paths.get(targetDirectoryPath).resolve(p.getFileName()), StandardCopyOption.REPLACE_EXISTING);
     }
 
     @SneakyThrows
