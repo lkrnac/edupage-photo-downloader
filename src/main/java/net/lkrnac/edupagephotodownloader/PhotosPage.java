@@ -69,7 +69,7 @@ public class PhotosPage {
     private void downloadPhotosGroup(WebElement li) {
         js.executeScript("arguments[0].scrollIntoView(true);", li);
         wait.until(ExpectedConditions.visibilityOf(li));
-        li.click();
+        openPhotoGroup(li);
         new PhotosPreviewPage(driver)
                 .downloadAllPhotos();
 
@@ -79,6 +79,13 @@ public class PhotosPage {
         String targetDirectoryPath = photosLocation + File.separator + nameWithoutEmojis;
         Files.createDirectories(Paths.get(targetDirectoryPath));
         moveFilesFromTemporaryFolder(targetDirectoryPath);
+    }
+
+    // This is workaround to skip corrupted gallery items.
+    private void openPhotoGroup(WebElement li) {
+        WebElement photoGroupFooter = li.findElement(By.cssSelector(".descContent"));
+        wait.until(ExpectedConditions.visibilityOf(photoGroupFooter));
+        photoGroupFooter.click();
     }
 
     @SneakyThrows
