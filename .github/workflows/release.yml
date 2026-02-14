@@ -22,9 +22,6 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Build JAR
-        run: mvn package -DskipTests -q
-
       - name: Get latest tag
         id: get_tag
         run: |
@@ -53,11 +50,18 @@ jobs:
           
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
 
+      - name: Update version in pom.xml
+        run: |
+          mvn versions:set -DnewVersion=${{ steps.version.outputs.new_tag }} -q
+
+      - name: Build JAR
+        run: mvn package -DskipTests -q
+
       - name: Generate changelog
         id: changelog
         run: |
           PREV_TAG=${{ steps.get_tag.outputs.tag }}
-          CHANGES=$(git log --pretty=format:"- %s (%h)" $PREV_TAG..HEAD 2>/dev/null || git log --pretty=format:"- %s (%h)" -n 50)
+          CHANGES=$(git log --merges --pretty=format:"- %s (%h)" $PREV_TAG..HEAD 2>/dev/null || git log --merges --pretty=format:"- %s (%h)" -n 50)
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
           echo "$CHANGES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
