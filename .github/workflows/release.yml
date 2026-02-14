@@ -61,7 +61,16 @@ jobs:
         id: changelog
         run: |
           PREV_TAG=${{ steps.get_tag.outputs.tag }}
-          CHANGES=$(gh pr list --base main --state merged --since "$PREV_TAG" --json number,title --jq '.[] | "- \(.title) (#\(.number))"')
+          if [ "$PREV_TAG" = "v0.0.0" ]; then
+            RANGE="HEAD"
+          else
+            RANGE="$PREV_TAG..HEAD"
+          fi
+          CHANGES=""
+          for PR_NUM in $(git log --merges --format="%s" $RANGE 2>/dev/null | grep -oE '[0-9]+' | sort -u); do
+            PR_TITLE=$(gh pr view $PR_NUM --json title --jq '.title')
+            CHANGES="${CHANGES}- ${PR_TITLE} (#${PR_NUM})"$'\n'
+          done
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
           echo "$CHANGES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
