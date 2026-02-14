@@ -86,6 +86,6 @@ jobs:
             ## Changelog
             
             ${{ steps.changelog.outputs.changelog }}
-          files: target/*.jar
+          files: target/edupage-photo-downloader-*.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

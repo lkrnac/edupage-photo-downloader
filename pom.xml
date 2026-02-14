@@ -79,7 +79,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <shadedArtifactAttached>false</shadedArtifactAttached>
+                            <shadedClassifierName/>
                             <transformers>
                                 <!-- Add Main-Class entry into the MANIFEST.MF -->
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
