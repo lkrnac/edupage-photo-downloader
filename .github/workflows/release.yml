@@ -61,10 +61,21 @@ jobs:
         id: changelog
         run: |
           PREV_TAG=${{ steps.get_tag.outputs.tag }}
-          CHANGES=$(git log --merges --pretty=format:"- %s (%h)" $PREV_TAG..HEAD 2>/dev/null || git log --merges --pretty=format:"- %s (%h)" -n 50)
+          CHANGES=$(git log --merges --format:"%b" $PREV_TAG..HEAD 2>/dev/null | awk '/^#[[:space:]]*[0-9]+/ { 
+            match($0, /#([0-9]+)/, m)
+            pr=m[1]
+            if(pr && !seen[pr]++) {
+              cmd = "gh pr view " pr " --json title --jq .title"
+              cmd | getline title
+              close(cmd)
+              print "- " title " (#" pr ")"
+            }
+          }')
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
           echo "$CHANGES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
