@@ -1,0 +1,76 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build JAR
+        run: mvn package -DskipTests -q
+
+      - name: Get latest tag
+        id: get_tag
+        run: |
+          git fetch --tags
+          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Bump version and create tag
+        id: version
+        run: |
+          CURRENT_TAG=${{ steps.get_tag.outputs.tag }}
+          CURRENT_VER=${CURRENT_TAG#v}
+          
+          MAJOR=$(echo $CURRENT_VER | cut -d. -f1)
+          MINOR=$(echo $CURRENT_VER | cut -d. -f2)
+          PATCH=$(echo $CURRENT_VER | cut -d. -f3)
+          
+          if [ "$MINOR" = "" ] || [ "$PATCH" = "" ]; then
+            MAJOR=0
+            MINOR=0
+            PATCH=0
+          fi
+          
+          NEW_PATCH=$((PATCH + 1))
+          NEW_TAG="v${MAJOR}.${MINOR}.${NEW_PATCH}"
+          
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=${{ steps.get_tag.outputs.tag }}
+          CHANGES=$(git log --pretty=format:"- %s (%h)" $PREV_TAG..HEAD 2>/dev/null || git log --pretty=format:"- %s (%h)" -n 50)
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.new_tag }}
+          name: Release ${{ steps.version.outputs.new_tag }}
+          body: |
+            ## Changelog
+            
+            ${{ steps.changelog.outputs.changelog }}
+          files: target/*.jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
