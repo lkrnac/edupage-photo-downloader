@@ -44,6 +44,9 @@ public class PhotosPreviewPage {
                 actions.sendKeys(Keys.ARROW_RIGHT).perform();
             }
         }
+        // Wait for the last file to complete downloading
+        //noinspection BusyWait
+        Thread.sleep(500);
 
         WebElement backdButton = wait.until(ExpectedConditions.visibilityOfElementLocated((By.cssSelector(".photos-albumTitle i"))));
         backdButton.click();
